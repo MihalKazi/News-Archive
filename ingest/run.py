@@ -45,7 +45,7 @@ def tag_article(
         log.warning("tagging failed for article %d: %s", article_id, exc)
 
 
-async def embed_article(conn, article_id: int, title: str, body: str | None, counts: Counter) -> None:
+def embed_article(conn, article_id: int, title: str, body: str | None, counts: Counter) -> None:
     """Store passage embedding for search. Failure leaves the article searchable by keyword."""
     try:
         vec = embed.embed([embed.passage_text(title, body)], kind="passage")[0]
