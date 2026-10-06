@@ -1,7 +1,11 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "motion/react";
+import { Search as SearchIcon } from "lucide-react";
 import { StickFigure } from "./stick-figure";
+import { CatchSearch } from "./catch-search";
+import { SketchBox } from "./sketch-box";
 
 type Tag = { slug: string; label: string; source: "auto" | "human"; confidence: number | null };
 
@@ -41,6 +45,14 @@ export default function Page() {
   const [to, setTo] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [status, setStatus] = useState<Status>("idle");
+  // Results show only after the catch animation finishes, even if the request returned earlier.
+  const [revealed, setRevealed] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  // Bring the animation to the middle of the screen whenever a search starts or plays.
+  useEffect(() => {
+    if (status === "loading") stageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [status]);
   const [error, setError] = useState<string | null>(null);
 
   const outlets = useMemo(() => {
@@ -80,14 +92,33 @@ export default function Page() {
     return params.toString();
   }
 
-  async function search(e: FormEvent) {
+  function search(e: FormEvent) {
     e.preventDefault();
-    const q = query.trim();
+    runSearch(query.trim());
+  }
+
+  // Suggestions: only queries verified to return results on the live archive.
+  const SUGGESTIONS = [
+    "arrested for writing against PM",
+    "against PM",
+    "PM Tarique Japan visit",
+    "harassment women",
+    "dengue",
+    "ধর্ষণ",
+  ];
+
+  function runSuggestion(s: string) {
+    setQuery(s);
+    runSearch(s);
+  }
+
+  async function runSearch(q: string) {
     if (!q && !from && !to) return;
 
     setSubmitted(q);
     setActive({ q, from, to });
     setStatus("loading");
+    setRevealed(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     setError(null);
     setOutletFilter(null);
     setHasMore(false);
@@ -133,7 +164,7 @@ export default function Page() {
         <div className="mx-auto flex max-w-[1120px] items-center justify-between gap-4">
           <span className="font-[family-name:var(--hand)] text-[30px] leading-none">News Archive</span>
           <span className="font-[family-name:var(--hand)] text-[18px] text-[var(--muted)]">
-            {status === "done" ? `${visible.length} found` : "stored articles"}
+            {status === "done" && revealed ? `${visible.length} found` : "stored articles"}
           </span>
         </div>
       </header>
@@ -142,12 +173,12 @@ export default function Page() {
         <div className="flex flex-col items-stretch gap-6 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0 flex-1">
             <h1 className="font-[family-name:var(--hand)] text-[clamp(2.6rem,7vw,4.6rem)] leading-[0.98] tracking-tight">
-              Find the story.
+              Search Bangladeshi news
               <br />
-              <span className="text-[var(--muted)]">Then open the source.</span>
+              <span className="text-[var(--muted)]">by topic, name, or date.</span>
             </h1>
             <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-[var(--muted)]">
-              Every result is a real article from the outlets we monitor, with its date and a link to the original.
+              Each result is an article from a monitored outlet, with its date and a link to the original.
             </p>
 
             <form onSubmit={search} className="mt-6 flex items-stretch gap-3">
@@ -159,10 +190,15 @@ export default function Page() {
                 placeholder="dengue, Tarique Rahman, ডেঙ্গু"
                 className="field-sketch w-0 min-w-0 flex-1 text-[20px] placeholder:text-[var(--muted)]"
               />
-              <button type="submit" disabled={status === "loading"} className="btn-sketch shrink-0">
+              <motion.button
+                type="submit"
+                disabled={status === "loading"}
+                whileTap={{ scale: 0.96 }}
+                className="btn-sketch shrink-0"
+              >
                 {status === "loading" ? "Digging" : "Search"}
-                <span aria-hidden="true">→</span>
-              </button>
+                <SearchIcon aria-hidden="true" size={18} strokeWidth={2} />
+              </motion.button>
             </form>
 
             <div className="mt-4 flex flex-wrap items-end gap-3 font-[family-name:var(--hand)] text-[17px] text-[var(--muted)]">
@@ -176,11 +212,15 @@ export default function Page() {
               </label>
             </div>
           </div>
-          <div className="hidden md:block">
-            <StickFigure pose={status === "loading" ? "write" : "hold"} size={110} />
-          </div>
         </div>
       </section>
+
+      {(status === "loading" || ((status === "done" || status === "error") && !revealed)) && (
+        <div ref={stageRef} className="mx-auto flex w-full max-w-[1120px] flex-col items-center gap-4 px-4 pb-4 pt-2">
+          <CatchSearch status={status} size={240} onSequenceEnd={() => setRevealed(true)} />
+          <p className="font-[family-name:var(--hand)] text-[22px] text-[var(--muted)]">Searching the archive</p>
+        </div>
+      )}
 
       <div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-8 px-4 pb-16 md:grid-cols-[220px_minmax(0,1fr)] md:gap-10">
         <aside className="min-w-0 space-y-7 md:sticky md:top-24 md:self-start">
@@ -222,36 +262,47 @@ export default function Page() {
 
         <main className="min-w-0">
           {status === "idle" && (
-            <div className="sketch-soft flex items-center gap-5 p-5">
-              <StickFigure pose="shrug" size={64} />
-              <p className="font-[family-name:var(--hand)] text-[21px] leading-snug text-[var(--muted)]">
-                Nothing searched yet. Try <span className="text-[var(--text)]">dengue</span> or{" "}
-                <span className="text-[var(--text)]">Tarique Rahman</span>.
-              </p>
-            </div>
+            <SketchBox className="text-[var(--muted)]">
+              <div className="flex flex-col gap-4 p-5">
+                <div className="flex items-center gap-5">
+                  <StickFigure pose="shrug" size={64} />
+                  <p className="font-[family-name:var(--hand)] text-[21px] leading-snug text-[var(--muted)]">
+                    Nothing searched yet. Try one of these:
+                  </p>
+                </div>
+                <ul className="flex flex-wrap gap-2">
+                  {SUGGESTIONS.map((s) => (
+                    <li key={s}>
+                      <button type="button" onClick={() => runSuggestion(s)} className="chip-sketch">
+                        {s}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </SketchBox>
           )}
-          {status === "loading" && (
-            <div className="flex items-center gap-4 p-2">
-              <StickFigure pose="write" size={56} />
-              <p className="font-[family-name:var(--hand)] text-[20px] text-[var(--muted)]">Searching the archive</p>
-            </div>
-          )}
-          {status === "error" && (
+          {status === "error" && revealed && (
             <div role="alert" className="sketch-soft flex items-center gap-4 p-4">
               <StickFigure pose="shrug" size={52} />
               <p className="font-[family-name:var(--hand)] text-[20px] text-red-400">{error}</p>
+              <button type="button" onClick={() => runSearch(active.q)} className="btn-sketch ml-auto shrink-0">
+                Try again
+              </button>
             </div>
           )}
-          {status === "done" && results.length === 0 && (
-            <div className="sketch-soft flex items-center gap-5 p-5">
-              <StickFigure pose="shrug" size={64} />
-              <p className="font-[family-name:var(--hand)] text-[22px] text-[var(--muted)]">
-                No matching articles. Try a shorter word.
-              </p>
-            </div>
+          {status === "done" && revealed && results.length === 0 && (
+            <SketchBox className="text-[var(--muted)]">
+              <div className="flex items-center gap-5 p-5">
+                <StickFigure pose="shrug" size={64} />
+                <p className="font-[family-name:var(--hand)] text-[22px] text-[var(--muted)]">
+                  No matching articles. Try a shorter word.
+                </p>
+              </div>
+            </SketchBox>
           )}
 
-          {status === "done" && results.length > 0 && (
+          {status === "done" && revealed && results.length > 0 && (
             <>
               <p className="mb-2 font-[family-name:var(--hand)] text-[19px] text-[var(--muted)]">
                 {visible.length} for &ldquo;{submitted || "all"}&rdquo;
@@ -261,9 +312,14 @@ export default function Page() {
                   <h2 className="mt-7 font-[family-name:var(--hand)] text-[26px] leading-none">{day}</h2>
                   <ol className="mt-2">
                     {items.map((r, i) => (
-                      <li
+                      <motion.li
                         key={r.id}
-                        className="result-row grid grid-cols-[44px_minmax(0,1fr)] gap-3 border-b border-[var(--line)] py-3.5 md:grid-cols-[52px_62px_minmax(0,1fr)]"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: Math.min(i, 12) * 0.03, ease: [0.22, 1, 0.36, 1] }}
+                        whileHover={{ x: 6 }}
+                        whileTap={{ scale: 0.99 }}
+                        className="result-row group grid grid-cols-[44px_minmax(0,1fr)] gap-3 border-b border-[var(--line)] px-2 py-3.5 transition-colors duration-300 hover:bg-[var(--panel)] md:grid-cols-[52px_62px_minmax(0,1fr)]"
                       >
                         <span className="row-num pt-0.5 font-[family-name:var(--hand)] text-[20px] text-[var(--accent)]">
                           {i + 1}
@@ -280,7 +336,7 @@ export default function Page() {
                             target="_blank"
                             rel="noopener noreferrer"
                             lang={isBangla(r.title) ? "bn" : undefined}
-                            className={`text-balance underline decoration-[var(--line)] decoration-2 underline-offset-4 hover:decoration-[var(--accent)] ${
+                            className={`text-balance underline decoration-[var(--line)] decoration-2 underline-offset-4 hover:decoration-[var(--violet)] hover:text-[var(--violet)] group-hover:text-[var(--violet)] transition-colors duration-300 ${
                               isBangla(r.title)
                                 ? "font-[family-name:var(--bn)] text-[17px] font-medium leading-[1.6]"
                                 : "text-[17px] font-medium leading-snug"
@@ -289,14 +345,14 @@ export default function Page() {
                             {r.title}
                           </a>
                           <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-[var(--muted)]">
-                            <span className="text-[var(--text)]">{r.outlet.name}</span>
+                            <span className="text-[var(--text)] transition-colors duration-300 group-hover:text-[var(--violet)]">{r.outlet.name}</span>
                             <time className="tabular-nums md:hidden">
                               {r.publishedAt ? DHAKA_TIME.format(new Date(r.publishedAt)) : "—"}
                             </time>
-                            <span>{r.tags.length ? r.tags.map((t) => t.label).join(" · ") : "untagged"}</span>
+                            {r.tags.length > 0 && <span>{r.tags.map((t) => t.label).join(" · ")}</span>}
                           </p>
                         </div>
-                      </li>
+                      </motion.li>
                     ))}
                   </ol>
                 </section>

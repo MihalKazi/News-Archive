@@ -10,6 +10,7 @@
   --muted: #a2a2ad;
   --line: #34343c;
   --accent: #c5b9ff;
+  --violet: #c5b9ff;
   --cape: #b72f42;
   --sans: var(--font-sans), var(--font-bn), system-ui, sans-serif;
   --hand: var(--font-hand), var(--font-bn), cursive;
@@ -25,6 +26,7 @@
   --muted: #5b5a63;
   --line: #d6d3ca;
   --accent: #4a3fb0;
+  --violet: #6a4fd8;
   --cape: #b72f42;
 }
 
@@ -37,6 +39,7 @@
     --muted: #5b5a63;
     --line: #d6d3ca;
     --accent: #4a3fb0;
+    --violet: #6a4fd8;
   }
 }
 
@@ -206,4 +209,60 @@ a {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Searching pose: body sways, magnifier sweeps across as if scanning a page. */
+@keyframes lens-sweep {
+  from {
+    transform: translateX(-6px) rotate(-8deg);
+  }
+  to {
+    transform: translateX(6px) rotate(8deg);
+  }
+}
+
+.stick-search {
+  animation: bob 1.4s ease-in-out infinite;
+}
+
+.stick-search .lens {
+  transform-box: view-box;
+  transform-origin: 56px 38px;
+  animation: lens-sweep 1.6s ease-in-out infinite alternate;
+}
+
+/* Fishing poses. Cast: rod swings overhead and back. Reel: the hooked article bobs on the line. */
+@keyframes cast-swing {
+  from {
+    transform: rotate(-65deg);
+  }
+  to {
+    transform: rotate(35deg);
+  }
+}
+
+@keyframes reel-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.stick-cast .rod {
+  transform-box: view-box;
+  transform-origin: 30px 40px;
+  animation: cast-swing 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+
+.stick-cast .cast-line {
+  stroke-dashoffset: 0;
+  animation: scribble 0.8s linear infinite;
+}
+
+.stick-reel .article-card {
+  transform-box: view-box;
+  animation: reel-bob 1.8s ease-in-out infinite;
 }
