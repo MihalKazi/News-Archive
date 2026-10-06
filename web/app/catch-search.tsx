@@ -64,6 +64,17 @@ type Frame = {
 
 // Pose and hook for the current time. Loading casts on a loop. Results reel in.
 // A miss drops the hook to the ground. Captions follow the reference's wording.
+const LOADING_LINES = [
+  "Casting for articles…",
+  "Fishing through the archive. No boots needed.",
+  "Still reading. Every article gets a link, we promise.",
+  "Patience. Good fish take time.",
+  "The fish are in there. Probably.",
+  "Asking the archive nicely.",
+  "No AI answers here. Just real articles, slowly.",
+  "Our hook is sharp. Our Wi-Fi less so.",
+];
+
 function sample(status: Status, t: number): Frame {
   const hook = { x: 386, y: 262, rot: 0, sag: 10 };
   let pose: Pose = "stand";
@@ -73,6 +84,7 @@ function sample(status: Status, t: number): Frame {
   let caption = "";
 
   if (status === "loading" || status === "idle") {
+    // rotates once per cast; first cast keeps "He has a plan."
     const c = t % 2.6;
     if (c < 0.5) {
       v = lerpPose(POSE.stand, POSE.windup, ease(phase(c, 0, 0.5)));
@@ -100,7 +112,7 @@ function sample(status: Status, t: number): Frame {
       hook.y = 262 - Math.sin(q * Math.PI) * 120 + 60 * q;
       hook.rot = q * 210;
       hook.sag = 30 * (1 - q);
-      caption = t < 1.24 ? "He has a plan." : "Casting for articles…";
+      caption = t < 1.24 ? "He has a plan." : LOADING_LINES[Math.floor(t / 2.6) % LOADING_LINES.length];
     }
   } else if (status === "done") {
     const h = Math.min(t, 5);
