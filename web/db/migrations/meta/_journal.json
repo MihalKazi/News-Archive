@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791299250050,
+      "tag": "0000_icy_zuras",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791304658832,
+      "tag": "0001_article_embeddings",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791318232839,
+      "tag": "0002_article_chunks",
+      "breakpoints": true
+    }
+  ]
+}

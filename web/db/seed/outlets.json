@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Prothom Alo",
+    "domain": "www.prothomalo.com",
+    "feedUrl": "https://www.prothomalo.com/feed",
+    "active": true
+  },
+  {
+    "name": "Prothom Alo (English)",
+    "domain": "en.prothomalo.com",
+    "feedUrl": "https://en.prothomalo.com/stories.rss",
+    "active": false
+  },
+  {
+    "name": "The Daily Star",
+    "domain": "www.thedailystar.net",
+    "feedUrl": "https://www.thedailystar.net/rss.xml",
+    "active": false
+  },
+  {
+    "name": "bdnews24",
+    "domain": "bdnews24.com",
+    "feedUrl": "https://bdnews24.com/rss.xml",
+    "active": false
+  },
+  {
+    "name": "Dhaka Tribune",
+    "domain": "www.dhakatribune.com",
+    "feedUrl": "https://www.dhakatribune.com/feed/",
+    "active": true
+  },
+  {
+    "name": "New Age",
+    "domain": "www.newagebd.net",
+    "feedUrl": "https://www.newagebd.net/feed",
+    "active": false
+  },
+  {
+    "name": "The Business Standard",
+    "domain": "www.tbsnews.net",
+    "feedUrl": "https://www.tbsnews.net/rss.xml",
+    "active": true
+  }
+]

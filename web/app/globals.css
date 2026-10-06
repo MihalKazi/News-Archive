@@ -1,0 +1,209 @@
+@import "tailwindcss";
+
+/* Dark is the default: a playful, hand-drawn UI on a dim ground.
+   Light mode redefines the same tokens. */
+:root {
+  color-scheme: dark;
+  --bg: #18181c;
+  --panel: #1c1c21;
+  --text: #eeeeef;
+  --muted: #a2a2ad;
+  --line: #34343c;
+  --accent: #c5b9ff;
+  --cape: #b72f42;
+  --sans: var(--font-sans), var(--font-bn), system-ui, sans-serif;
+  --hand: var(--font-hand), var(--font-bn), cursive;
+  --bn: var(--font-bn), var(--font-sans), sans-serif;
+  font-family: var(--sans);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f5f1;
+  --panel: #ffffff;
+  --text: #17161a;
+  --muted: #5b5a63;
+  --line: #d6d3ca;
+  --accent: #4a3fb0;
+  --cape: #b72f42;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #f6f5f1;
+    --panel: #ffffff;
+    --text: #17161a;
+    --muted: #5b5a63;
+    --line: #d6d3ca;
+    --accent: #4a3fb0;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Hand-drawn corners: uneven radii read as drawn, not templated. */
+.sketch {
+  border: 1.5px solid var(--text);
+  border-radius: 5px 9px 6px 4px;
+}
+
+.sketch-soft {
+  border: 1px solid var(--line);
+  border-radius: 9px 5px 8px 4px;
+}
+
+.btn-sketch {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  border: 1.5px solid var(--text);
+  border-radius: 5px 8px 6px 4px;
+  padding: 10px 20px;
+  font-family: var(--hand);
+  font-size: 21px;
+  line-height: 1;
+  background: transparent;
+  color: var(--text);
+  transition: background 0.18s, color 0.18s, transform 0.18s;
+}
+
+.btn-sketch:hover:not(:disabled) {
+  background: var(--text);
+  color: var(--bg);
+  transform: rotate(-1.5deg) translateY(-2px);
+}
+
+.btn-sketch:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn-sketch:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+
+.chip-sketch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px 6px 12px 5px;
+  padding: 4px 12px;
+  font-family: var(--hand);
+  font-size: 17px;
+  color: var(--muted);
+  background: transparent;
+  transition: color 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.chip-sketch:hover {
+  color: var(--text);
+  transform: rotate(-1deg);
+}
+
+.chip-sketch[aria-pressed="true"] {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.field-sketch {
+  background: transparent;
+  color: var(--text);
+  border: 1.5px dashed var(--line);
+  border-radius: 10px 6px 9px 5px;
+  padding: 10px 14px;
+  font-family: var(--hand);
+  font-size: 19px;
+}
+
+.field-sketch:focus {
+  outline: none;
+  border-style: solid;
+  border-color: var(--accent);
+}
+
+/* Small motion, one idea each. Stopped under reduced-motion. */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes scribble {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.stick-bob {
+  animation: bob 2.6s ease-in-out infinite;
+}
+
+/* Searching pose: body bobs, writing arm swings from the shoulder, pen scribbles. */
+@keyframes write-arm {
+  from {
+    transform: rotate(-12deg);
+  }
+  to {
+    transform: rotate(16deg);
+  }
+}
+
+.stick-write {
+  animation: bob 1.2s ease-in-out infinite;
+}
+
+.stick-write .arm-write {
+  transform-box: view-box;
+  transform-origin: 30px 40px;
+  animation: write-arm 0.45s ease-in-out infinite alternate;
+}
+
+.stick-write .pen {
+  stroke-dasharray: 14 6;
+  animation: scribble 0.9s linear infinite;
+}
+
+.row-num {
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.result-row:hover .row-num {
+  transform: rotate(-4deg) translateX(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

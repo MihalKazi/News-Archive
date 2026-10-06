@@ -1,0 +1,50 @@
+{
+  "_note": "Expected URLs verified by reading stored body text (keyword check). Re-verify if archive is re-imported.",
+  "cases": [
+    {
+      "id": "arrest-for-criticising-pm",
+      "query": "arrested for writing against PM",
+      "topN": 5,
+      "expectUrls": [
+        "https://www.thedailystar.net/news/crime-justice/news/man-detained-moulvibazar-over-alleged-derogatory-remarks-about-pm-tiktok-4290196",
+        "https://www.newagebd.net/post/country/316547/man-held-over-making-offensive-comments-about-pm-tarique"
+      ]
+    },
+    {
+      "id": "custodial-death-bangladesh",
+      "query": "custodial death",
+      "topN": 5,
+      "expectUrls": [
+        "https://www.dhakatribune.com/bangladesh/420572/2-under-trial-prisoners-die-at-dmch"
+      ]
+    },
+    {
+      "id": "attack-on-journalists-ru",
+      "query": "attack on journalists Rajshahi University",
+      "topN": 5,
+      "expectUrls": [
+        "https://www.dhakatribune.com/bangladesh/crime/421406/case-filed-over-attack-on-journalists-at-ru",
+        "https://www.newagebd.net/post/country/316609/4-journalists-among-10-injured-in-ru-attack"
+      ]
+    },
+    {
+      "id": "pm-japan-visit",
+      "query": "PM Tarique Japan visit",
+      "topN": 5,
+      "expectUrls": [
+        "https://www.dhakatribune.com/bangladesh/foreign-affairs/421454/pm-tarique-to-visit-japan-manpower-deal-on-cards"
+      ]
+    },
+    {
+      "id": "bangla-rape-keyword",
+      "query": "ধর্ষণ",
+      "topN": 5,
+      "expectMinCount": 1
+    },
+    {
+      "id": "nonsense-no-results",
+      "query": "zzqxnonexistentword",
+      "expectCount": 0
+    }
+  ]
+}
