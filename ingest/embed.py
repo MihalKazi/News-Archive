@@ -1,48 +1,60 @@
-"""Local multilingual embeddings (intfloat/multilingual-e5-small, 384-dim, Bangla-capable).
+"""Multilingual embeddings via Cloudflare Workers AI (@cf/baai/bge-m3, 1024-dim, Bangla-capable).
 
-Free, no API key. Passages and queries use the e5 prefixes. Same model must embed both sides.
+Needs CF_ACCOUNT_ID and CF_API_TOKEN (Workers AI permission). Same model must embed passages and queries.
+bge-m3 takes no e5-style prefixes, so kind is accepted for call-site clarity but not applied.
 """
 
 import logging
 import os
-import threading
+import time
+
+import httpx
 
 log = logging.getLogger(__name__)
 
-MODEL_NAME = os.environ.get("EMBED_MODEL", "intfloat/multilingual-e5-small")
-DIMS = 384
-PASSAGE_CHARS = 1500  # title + body head; model max 512 tokens
+MODEL_NAME = "@cf/baai/bge-m3"
+DIMS = 1024
+PASSAGE_CHARS = 1500  # title + body head
+BATCH_MAX = 100  # Workers AI embedding batch cap
+RETRIES = 4
 
-_model = None
-_lock = threading.Lock()
+_URL = "https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/" + MODEL_NAME
 
 
-def _load():
-    global _model
-    with _lock:
-        if _model is None:
-            import torch
-            from sentence_transformers import SentenceTransformer
-
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            log.info("loading %s on %s", MODEL_NAME, device)
-            _model = SentenceTransformer(MODEL_NAME, device=device)
-    return _model
+def _client() -> tuple[str, dict]:
+    account = os.environ["CF_ACCOUNT_ID"]
+    token = os.environ["CF_API_TOKEN"]
+    return _URL.format(account=account), {"Authorization": f"Bearer {token}"}
 
 
 def embed(texts: list[str], kind: str) -> list[list[float]]:
     """kind: 'passage' for stored articles, 'query' for search input."""
     if kind not in ("passage", "query"):
         raise ValueError(f"bad kind {kind!r}")
-    prefix = f"{kind}: "
-    vecs = _load().encode(
-        [prefix + t for t in texts],
-        batch_size=32,
-        normalize_embeddings=True,
-        convert_to_numpy=True,
-        show_progress_bar=False,
-    )
-    return [v.tolist() for v in vecs]
+    url, headers = _client()
+    out: list[list[float]] = []
+    for i in range(0, len(texts), BATCH_MAX):
+        out.extend(_post(url, headers, texts[i : i + BATCH_MAX]))
+    return out
+
+
+def _post(url: str, headers: dict, batch: list[str]) -> list[list[float]]:
+    for attempt in range(RETRIES):
+        resp = httpx.post(url, headers=headers, json={"text": batch}, timeout=60)
+        if resp.status_code == 429 or resp.status_code >= 500:
+            wait = 2**attempt
+            log.warning("workers ai %s, retry in %ss", resp.status_code, wait)
+            time.sleep(wait)
+            continue
+        resp.raise_for_status()
+        body = resp.json()
+        if not body.get("success"):
+            raise RuntimeError(f"workers ai error: {body.get('errors')}")
+        vecs = body["result"]["data"]
+        if len(vecs) != len(batch) or any(len(v) != DIMS for v in vecs):
+            raise RuntimeError("workers ai returned unexpected shape")
+        return vecs
+    raise RuntimeError("workers ai retries exhausted")
 
 
 def passage_text(title: str, body: str | None) -> str:

@@ -17,6 +17,8 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       TAGGING_MODEL: ${{ vars.TAGGING_MODEL || 'llama-3.1-8b-instant' }}
       MAX_ARTICLES_PER_RUN: ${{ vars.MAX_ARTICLES_PER_RUN || '50' }}
       INGEST_USER_AGENT: ${{ vars.INGEST_USER_AGENT || 'NewsFinderBot/0.1' }}

@@ -98,7 +98,7 @@ export const articleEmbeddings = pgTable(
       .primaryKey()
       .references(() => articles.id, { onDelete: "cascade" }),
     model: text("model").notNull(),
-    embedding: vector("embedding", 384).notNull(),
+    embedding: vector("embedding", 1024).notNull(),
   },
   (t) => [
     index("article_embeddings_hnsw_idx").using("hnsw", t.embedding.op("vector_cosine_ops")),
@@ -116,7 +116,7 @@ export const articleChunks = pgTable(
     chunkNo: integer("chunk_no").notNull(),
     text: text("text").notNull(),
     tsv: tsvector("tsv").generatedAlwaysAs(sql`to_tsvector('simple', text)`),
-    embedding: vector("embedding", 384),
+    embedding: vector("embedding", 1024),
   },
   (t) => [
     primaryKey({ columns: [t.articleId, t.chunkNo] }),

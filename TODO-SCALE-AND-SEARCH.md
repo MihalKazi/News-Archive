@@ -6,7 +6,7 @@ Parked for later. Read top to bottom before resuming work.
 
 - Articles: ~14.1k in Supabase (99 scraped here + 14,011 imported from Takedown Watch).
 - Live outlets in ingest: Prothom Alo, Dhaka Tribune, TBS (+ Ittefaq, Dainik Azadi, DMPNews validated, not yet enabled).
-- Search: keyword (tsvector `simple`, prefix, AND) + LLM concept expansion (Groq) + semantic (`multilingual-e5-small`, one vector per article, first 1,500 chars) + threshold gate.
+- Search: keyword (tsvector `simple`, prefix, AND) + LLM concept expansion (Groq) + semantic (Workers AI `@cf/baai/bge-m3`, 1024-dim, one vector per article, first 1,500 chars) + threshold gate.
 - Eval: `web/tests/search-cases.json`, runner `node web/scripts/search-eval.mjs`. Last run 2/6 pass (custodial death, RU journalist attack).
 - Design: Impeccable direction round not finished. Playful stick-figure UI in place. Mobile overflow not verified (headless Chrome min width ~500px).
 - DB size ~191 MB of 500 MB Supabase free cap.
@@ -92,7 +92,7 @@ Parked for later. Read top to bottom before resuming work.
 - Search route: `web/app/api/search/route.ts`
 - Concept expansion: `web/lib/expand.ts`
 - Semantic query: `web/lib/semantic.ts`
-- Embedding + query service: `ingest/embed.py`, `ingest/embed_server.py`, `ingest/embed_backfill.py`
+- Embedding: `ingest/embed.py` (Workers AI), `ingest/embed_backfill.py`; query embed in `web/lib/semantic.ts`
 - Ingest: `ingest/run.py`, `ingest/fetch.py`, `ingest/import_takedown.py`
 - Vendored Takedown Watch parsers/fetcher: `ingest/takedown/`
 - Schema: `web/db/schema.ts`, migrations `web/db/migrations/`
