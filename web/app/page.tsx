@@ -102,7 +102,7 @@ export default function Page() {
   const SUGGESTIONS = [
     "arrested for writing against PM",
     "against PM",
-    "PM Tarique Japan visit",
+    "attack on journalists Rajshahi University",
     "harassment women",
     "dengue",
     "ধর্ষণ",
