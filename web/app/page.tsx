@@ -6,6 +6,7 @@ import { Search as SearchIcon } from "lucide-react";
 import { StickFigure } from "./stick-figure";
 import { CatchSearch } from "./catch-search";
 import { SketchBox } from "./sketch-box";
+import { LoadMoreToggle } from "./load-more-toggle";
 
 type Tag = { slug: string; label: string; source: "auto" | "human"; confidence: number | null };
 
@@ -358,10 +359,8 @@ export default function Page() {
                 </section>
               ))}
               {hasMore && (
-                <div className="mt-8 flex items-center gap-4">
-                  <button type="button" onClick={loadMore} disabled={loadingMore} className="btn-sketch">
-                    {loadingMore ? "Fetching more" : "Load more"}
-                  </button>
+                <div className="mt-8 flex flex-col items-center gap-2">
+                  <LoadMoreToggle loading={loadingMore} hasMore={hasMore} onClick={loadMore} />
                   <span className="font-[family-name:var(--hand)] text-[17px] text-[var(--muted)]">
                     {results.length} shown so far
                   </span>
